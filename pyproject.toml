@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "therl"
+version = "0.1.0"
+description = "A human readable programming language"
+readme = "README.md"
+requires-python = ">=3.13"
+
+[project.scripts]
+run-my-tool = "therl.app:main"

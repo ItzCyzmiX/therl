@@ -1,0 +1,2 @@
+[console_scripts]
+run-my-tool = therl.app:main

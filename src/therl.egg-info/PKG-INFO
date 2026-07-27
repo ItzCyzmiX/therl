@@ -1,0 +1,144 @@
+Metadata-Version: 2.4
+Name: therl
+Version: 0.1.0
+Summary: A human readable programming language
+Requires-Python: >=3.13
+Description-Content-Type: text/markdown
+
+# Therl
+
+> **T**ruly **H**uman **R**eadaby **L**anguage  
+> _(Yes, the acronym is a little cursed. I know.)_
+
+Therl is a human-readable, instruction-based programming language written entirely in pure Python. Its goal is to make code read almost like plain English while remaining predictable and easy to parse.
+
+```therl
+set greeting to "hello"
+
+func greet <name>
+
+    say greeting + " " + name + "!"
+
+eof
+
+func main
+
+    run greet with <name> as "Jeff"
+
+    set numbers to [1..10]
+
+    say numbers
+
+eof
+
+run main
+```
+
+Output:
+
+```text
+hello Jeff!
+[1, 2, 3, 4, 5, 6, 7, 8, 9]
+```
+
+---
+
+## Features
+
+- 📖 Human-readable syntax
+- 📝 Instruction-based language design
+- 🐍 Written entirely in pure Python
+- 🔄 Strictly dynamically typed variables
+- 📦 Built-in lists
+- 🔢 Integer, float, string and boolean types
+- 🧩 Functions with named parameters
+- 📢 Simple `say` statement for output
+- ✏️ Mutable list elements
+- 🚀 Easy to extend
+
+---
+
+## Example
+
+```therl
+set greeting to "hello"
+
+func greet <name>
+
+    say greeting + " " + name + "!"
+
+eof
+
+func main
+
+    say "Welcome!"
+
+    run greet with <name> as "Jeff"
+
+    set ids to [1..10]
+
+    say ids
+
+    set ids at 0 to 1000
+
+    say ids
+
+    add 10 to ids
+
+    say ids
+
+eof
+
+run main
+```
+
+Output:
+
+```text
+Welcome!
+hello Jeff!
+[1, 2, 3, 4, 5, 6, 7, 8, 9]
+[1000, 2, 3, 4, 5, 6, 7, 8, 9]
+[1000, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+```
+
+---
+
+# Project Status
+
+⚠️ Therl is currently in active development.
+
+Expect missing features, breaking changes, and plenty of experimentation as the language evolves.
+
+---
+
+# Roadmap
+
+- [ ] Arithmetic expressions
+- [ ] Conditional statements
+- [ ] Loops
+- [ ] Dictionaries / Maps
+- [ ] Modules
+- [ ] Classes
+- [ ] Error reporting with line numbers
+- [ ] Standard library
+
+---
+
+# Why?
+
+Because making programming languages is fun.
+
+And because writing
+
+```therl
+set score to 100
+
+add 10 to score
+
+say score
+```
+
+just feels oddly satisfying.
+
+---

@@ -79,6 +79,3 @@ def main():
 
         if not inside_function:
             INSTRUCTION_TO_FUNC[action](arg)
-
-
-main()
