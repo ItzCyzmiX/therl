@@ -6,8 +6,16 @@ build-backend = "setuptools.build_meta"
 name = "therl"
 version = "0.1.0"
 description = "A human readable programming language"
+authors = [
+  { name="CyzmiX", email="itzmedigamingx@gmail.com" },
+]
 readme = "README.md"
 requires-python = ">=3.13"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
 
 [project.scripts]
 run-my-tool = "therl.app:main"

@@ -2,3 +2,5 @@ __pycache__
 main.dist
 main.build
 therl.egg-info
+.env
+dist

@@ -97,6 +97,30 @@ hello Jeff!
 
 ---
 
+## Installation
+
+Therl requires **Python 3.10** or newer.
+
+Install the latest release from PyPI:
+
+```bash
+python -m pip install therl
+```
+
+Run a Therl program:
+
+```bash
+therl hello.therl
+```
+
+or
+
+```bash
+python -m therl hello.therl
+```
+
+---
+
 # Project Status
 
 ⚠️ Therl is currently in active development.
