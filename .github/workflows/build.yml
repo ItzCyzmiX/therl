@@ -26,7 +26,7 @@ jobs:
 
       - name: Compile with Nuitka
         run: |
-          python -m nuitka --mode=onefile --onefile main.py
+          python -m nuitka --mode=onefile main.py
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v7
