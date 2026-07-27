@@ -16,7 +16,8 @@ def _decode_value(value: str) -> Any:
         try:
             return eval(
                 value,
-                globals={
+                None,
+                {
                     var[0]: var[1].value for var in VARIABLES.items()
                 },  # will it be unsafe in this case ?
             )
