@@ -6,33 +6,37 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [macos-latest, ubuntu-latest, windows-latest]
+
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Check out repository
+      - name: Check-out repository
         uses: actions/checkout@v7
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v7
         with:
           python-version: "3.13"
+          architecture: "x64"
           cache: "pip"
+          cache-dependency-path: |
+            **/requirements*.txt
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install nuitka
-
-      - name: Compile with Nuitka
-        run: |
-          python -m nuitka --mode=onefile main.py
-
-      - name: Upload Build Artifacts
-        uses: actions/upload-artifact@v7
+      - name: Build Executable
+        uses: Nuitka/Nuitka-Action@main
         with:
-          name: binary-${{ matrix.os }}
+          nuitka-version: main
+          script-name: main.py
+          mode: app
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ runner.os }} Build
           path: |
-            *.exe
-            *.bin
-            main.dist/
+            build/*.exe
+            build/*.bin
+            build/*.app/**/*
+            build/*.dist/**/*
+          include-hidden-files: true
