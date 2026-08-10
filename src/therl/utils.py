@@ -1,14 +1,47 @@
 import sys
 from typing import Any
 
-import therl.consts
+from therl.error import InvalidType, UnknownVariable
 
 
-def _decode_value(value: str) -> Any:
-    from therl.runtime import VARIABLES
+def _decode_value(value: str, line: int = 1) -> Any:
+    import therl.runtime
+
+    if value.split(" ")[0].strip() == "run":
+        from therl.instructions import RUN
+
+        func_string = value.split("run", maxsplit=2)[1].strip()
+
+        return RUN(func_string)
+
+    if "at" in value.split(" "):
+        slices = value.split("at")
+        var_name = slices[0].strip()
+
+        index = _decode_value(slices[1].strip(), line=line)
+        if not isinstance(index, int):
+            print("Indexing must be done with an int!")
+            sys.exit(1)
+
+        var = therl.runtime.VARIABLES.get(var_name)
+
+        if var is None:
+            print(f"Variable with name {var} doesnt exist!")
+            sys.exit(1)
+
+        if not isinstance(var.value, (list, str)):
+            print(f"Indexing must be done on an array or str not a {var.type.__name__}")
+            sys.exit(1)
+        try:
+            return var.value[index]
+        except IndexError:
+            print("Index out of range!")
+            sys.exit(1)
 
     if value[0] == "[" and value[-1] == "]":
-        return _decode_array(value)
+        return _decode_array(value, line=line)
+
+    import therl.consts
 
     used_operator = not set(value.split(" ")).isdisjoint(therl.consts.OPERATORS)
 
@@ -18,7 +51,7 @@ def _decode_value(value: str) -> Any:
                 value,
                 None,
                 {
-                    var[0]: var[1].value for var in VARIABLES.items()
+                    var[0]: var[1].value for var in therl.runtime.VARIABLES.items()
                 },  # will it be unsafe in this case ?
             )
         except NameError as e:
@@ -45,14 +78,13 @@ def _decode_value(value: str) -> Any:
     except ValueError:
         pass
 
-    if VARIABLES.get(value) is not None:
-        return VARIABLES.get(value).value
+    if therl.runtime.VARIABLES.get(value) is not None:
+        return therl.runtime.VARIABLES.get(value).value
 
-    print("Invalid data value: ", value.strip())
-    sys.exit(1)
+    raise UnknownVariable(var_name=value, line=line)
 
 
-def _decode_array(array_str: str) -> list:
+def _decode_array(array_str: str, line: int = 1) -> list:
     clean_str = array_str[1:-1]  # remove [ ]
 
     if clean_str.strip() == "":
@@ -61,9 +93,10 @@ def _decode_array(array_str: str) -> list:
     if ".." in clean_str:
         try:
             s_and_f = clean_str.split("..")
-            start = int(s_and_f[0])
 
-            finish = int(s_and_f[-1])
+            start = _decode_value(s_and_f[0])
+
+            finish = _decode_value(s_and_f[-1])
 
             return list(range(start, finish))
         except ValueError:
@@ -75,8 +108,11 @@ def _decode_array(array_str: str) -> list:
     for val in clean_str.split(","):
         v = _decode_value(val.strip())
         if len(array) > 0 and type(array[0]) != type(v):
-            print("Cannot mix and match data types in array!")
-            sys.exit(1)
+            raise InvalidType(
+                supposed_type=type(array[0]).__name__,
+                wrong_type=type(v).__name__,
+                line=line,
+            )
 
         array.append(v)
 

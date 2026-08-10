@@ -8,13 +8,20 @@ from therl.variable import Variable
 
 
 def main():
+    sys.excepthook = lambda type, value, traceback: print(
+        f"{type.__name__} Error:\n\n{value}"
+    )
     try:
         if sys.argv[1].split(".")[-1] != "therl":
             print("Invalid file type, file must be .therl")
             sys.exit(1)
 
         with open(sys.argv[1], "r") as file:
-            instructions = [line.strip() for line in file if line.strip()]
+            instructions = [
+                [line.strip(), line_num + 1]
+                for line_num, line in enumerate(file)
+                if line.strip()
+            ]
     except IndexError:
         print("no file provided!")
         sys.exit(1)
@@ -28,7 +35,7 @@ def main():
     cur_func_params = set()
 
     for instruction in instructions:
-        tokens = [t.strip() for t in re.split(pattern, instruction, maxsplit=2) if t]
+        tokens = [t.strip() for t in re.split(pattern, instruction[0], maxsplit=1) if t]
 
         action = tokens[0]
 
@@ -78,4 +85,4 @@ def main():
                     break
 
         if not inside_function:
-            INSTRUCTION_TO_FUNC[action](arg)
+            INSTRUCTION_TO_FUNC[action](arg, instruction[1])

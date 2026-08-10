@@ -1,25 +1,7 @@
-set greeting to "hello"
-
-func greet <name>
-
-	say greeting + " " + name + "!"
-
+func lol
+	return "lala"
 eof
 
-func main
-	say "hello world!"
+set name to run lol
 
-	run greet with <name> as "Jeff"
-
-	set my_array to [1..10]
-
-	say my_array
-
-	set my_array at 0 to 10
-
-	say my_array
-
-	say my_array at 0
-eof
-
-run main
+say name

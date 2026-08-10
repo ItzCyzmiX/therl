@@ -1,5 +1,5 @@
 import sys
-from typing import Any, Generic, TypeVar
+from typing import Any, Generic, Literal, TypeVar
 
 T = TypeVar("T")
 
@@ -19,6 +19,11 @@ class Variable(Generic[T]):
 
         self.value = new_value
 
-    def cast(self, new_value: T):
-        self.type: type[T] = type(new_value)
-        self.value: T = new_value
+    def cast(self, type_converter: Literal[str, int, float, bool, list]):
+        old_type = self.type
+        try:
+            self.type: type[T] = type(type_converter(self.value))
+            self.value: T = type_converter(self.value)
+        except ValueError:
+            print(f"Cannot convert {old_type.__name__} to {type_converter.__name__}")
+            sys.exit(1)
