@@ -4,6 +4,7 @@ from typing import Any
 
 from therl.error import (
     IndexOutOfRange,
+    InvalidSyntax,
     InvalidType,
     RunningNonFunctionObject,
     UnknownFunction,
@@ -79,8 +80,9 @@ def SET(string: str, line: int = 1):
                 index=index, max_index=len(alr_exits.value), line=line
             )
     else:
-        print("invalid syntax expected 'to' or 'at' in variable assignment")
-        sys.exit(1)
+        raise InvalidSyntax(
+            wrong_syntax=f"Expected 'to' or 'at' in variable assignment, found {check_slices[1]}"
+        )
 
 
 def SAY(string: str, line: int = 1):
@@ -174,8 +176,9 @@ def RUN(string: str, line: int = 1) -> Any:
         for param in params_slices:
             s = [_.strip() for _ in re.split(re.escape(" "), param) if _]
             if s[1] != "as":
-                print(f"Expected as in parameter assignment, found {s[1]}")
-                sys.exit(1)
+                raise InvalidSyntax(
+                    wrong_syntax=f"Expected as in parameter assignment, found {s[1]}"
+                )
 
             name = s[0].strip().replace("<", "").replace(">", "")
 

@@ -3,18 +3,6 @@ from therl.api import THERL
 from therl.variable import Variable
 
 
-class Player(Variable):
-    def __init__(self):
-        self.hp = 100
-        super().__init__(name="player", value=self)
-
-    def hurt(self, amount: int):
-        self.hp -= amount
-
-    def heal(self, amount: int):
-        self.hp += amount
-
-
 def main():
     sys.excepthook = lambda type, value, traceback: print(
         f"{type.__name__} Error:\n\n{value}"
@@ -35,7 +23,5 @@ def main():
     except FileNotFoundError:
         print("file doesnt exist!")
         sys.exit(1)
-
-    THERL.runtime.new_object("player", Player())
 
     THERL.run(code=code_str)

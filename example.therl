@@ -1,19 +1,19 @@
 func start
 
     return 1
-eof
+end
 
 
 func finish
 
     return 10
 
-eof
+end
 
 
 set list to [run start..run finish]
 
-set list_two to [1, 2, 3, "str"]
+set list_two to [1, 2, 3, 3]
 
 say list_two
 

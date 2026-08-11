@@ -1,6 +1,6 @@
 class InvalidSyntax(Exception):
     def __init__(self, wrong_syntax: str, line: int):
-        super().__init__(f"Invalid syntax at line {line}: \n {wrong_syntax} ")
+        super().__init__(f"Invalid syntax at line {line}:\n{wrong_syntax} ")
 
 
 class InvalidIndex(Exception):
@@ -39,7 +39,7 @@ class UnknownVariable(Exception):
 class RunningNonFunctionObject(Exception):
     def __init__(self, var_name: str, type_: str, line: int):
         super().__init__(
-            f"Invalid RUN Instruction at line {line}\nCant run variable of {var_name} type {type_}, must be a function!"
+            f"Invalid RUN Instruction at line {line}\nCant run variable {var_name} of type {type_}, must be a function!"
         )
 
 
@@ -54,4 +54,11 @@ class UnknownAttribute(Exception):
     def __init__(self, object_name: str, attr_name: str, line: int):
         super().__init__(
             f"Invalid Attribute at line {line}\nAttribute nammed {attr_name} doesnt exist in object {object_name}"
+        )
+
+
+class NameInUse(Exception):
+    def __init__(self, var_name: str, line: int):
+        super().__init__(
+            f"Invalid Function Name\nA variable with the name {var_name} already exists!"
         )

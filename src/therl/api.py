@@ -1,6 +1,7 @@
 import sys
 from typing import Any
 import re
+from therl.error import NameInUse, UnknownVariable
 from therl.variable import Variable
 
 from therl.consts import pattern, params_pattern, INSTRUCTION_TO_FUNC
@@ -47,11 +48,12 @@ class Therl:
         cur_func_name = ""
         cur_func_params = set()
 
+        """[instruction string, line number (for errors)]"""
         instructions = [
             [line.strip(), line_num + 1]
             for line_num, line in enumerate(code.split("\n"))
             if line.strip()
-        ]  # [instruction string, line number (for errors)]
+        ]
 
         for instruction in instructions:
             tokens = [
@@ -87,10 +89,7 @@ class Therl:
                 cur_func_name = name_and_params[0]
 
                 if self.runtime.get(cur_func_name) is not None:
-                    print(
-                        f"Cant name function to a variable of the same name, '{cur_func_name}' is already defined!"
-                    )
-                    sys.exit(1)
+                    raise NameInUse(var_name=cur_func_name, line=instruction[1])
 
                 inside_function = True
                 params_split = [
