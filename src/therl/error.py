@@ -22,6 +22,13 @@ class InvalidType(Exception):
         )
 
 
+class UnknownParameter(Exception):
+    def __init__(self, func_name: str, wrong_param: str, params: list[str], line: int):
+        super().__init__(
+            f"Invalid Parameter Name at line {line}\nFunction {func_name} doesnt take paramter nammed {wrong_param}, it only accepts:\n{str(params)[1:-1]}"
+        )
+
+
 class UnknownVariable(Exception):
     def __init__(self, var_name: str, line: int):
         super().__init__(

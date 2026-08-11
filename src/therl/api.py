@@ -62,7 +62,7 @@ class Therl:
 
             arg = "".join(tokens[1:])
 
-            if action == "eof":
+            if action == "end":
                 inside_function = False
 
                 self.runtime.new(

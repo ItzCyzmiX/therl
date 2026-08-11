@@ -1,3 +1,18 @@
-run heal from player
+func start
 
-say hp from player
+    return 1
+eof
+
+
+func finish
+
+    return 10
+
+eof
+
+
+set list to [run start..run finish]
+
+set list_two to [1, 2, 3, "str"]
+
+say list_two

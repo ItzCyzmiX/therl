@@ -2,7 +2,14 @@ import re
 import sys
 from typing import Any
 
-from therl.error import RunningNonFunctionObject, UnknownFunction
+from therl.error import (
+    IndexOutOfRange,
+    InvalidType,
+    RunningNonFunctionObject,
+    UnknownFunction,
+    UnknownParameter,
+    UnknownVariable,
+)
 from therl.types import VARIABLES_TYPE
 from therl.utils import _decode_value
 from therl.variable import Variable
@@ -30,25 +37,30 @@ def SET(string: str, line: int = 1):
     elif check_slices[1] == "at":
         slices = string.split(" ", maxsplit=2)
 
-        name = slices[0]
+        name = slices[0].strip()
         alr_exits = THERL.runtime.get(name)
-        if alr_exits is None:
-            print(f"Cannot modify unexisisting array named {name}")
-            sys.exit(1)
 
-        if alr_exits.type != list and alr_exits.type != str:
-            print(
-                f"Cannot perform index based modification on {alr_exits.type.__name__}, must list or str"
+        if alr_exits is None:
+            raise UnknownVariable(var_name=name, line=line)
+
+        if not isinstance(alr_exits.value, (list, str)):
+            raise InvalidType(
+                wrong_type=alr_exits.type.__name__,
+                supposed_type="array or str",
+                line=line,
             )
-            sys.exit(1)
 
         index_and_value = [i.strip() for i in slices[2].split("to")]
-        try:
-            index = int(_decode_value(index_and_value[0], line=line))
 
-        except ValueError:
-            print("Invalid index type, expected int found str")
-            sys.exit(1)
+        index = _decode_value(index_and_value[0], line=line)
+
+        if not isinstance(index, int):
+
+            raise InvalidType(
+                wrong_type=type(index).__name__,
+                supposed_type="array or str",
+                line=line,
+            )
 
         value = index_and_value[1]
 
@@ -63,9 +75,9 @@ def SET(string: str, line: int = 1):
                 ),
             )
         except IndexError:
-            print("Index out of range!")
-            sys.exit(1)
-
+            raise IndexOutOfRange(
+                index=index, max_index=len(alr_exits.value), line=line
+            )
     else:
         print("invalid syntax expected 'to' or 'at' in variable assignment")
         sys.exit(1)
@@ -169,8 +181,12 @@ def RUN(string: str, line: int = 1) -> Any:
             name = s[0].strip().replace("<", "").replace(">", "")
 
             if name not in THERL.runtime.get(func_name).value.params:
-                print(f"Unknown parameter {name}")
-                sys.exit(1)
+                raise UnknownParameter(
+                    func_name=func_name,
+                    wrong_param=name,
+                    params=THERL.runtime.get(func_name).value.params,
+                    line=line,
+                )
 
             value = s[2].strip()
 
