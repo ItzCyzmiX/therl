@@ -9,7 +9,7 @@ from therl.variable import Variable
 
 
 def SET(string: str, line: int = 1):
-    import therl.runtime
+    from therl.api import THERL
 
     check_slices = string.split(" ")
 
@@ -19,19 +19,19 @@ def SET(string: str, line: int = 1):
         name = slices[0]
 
         value = _decode_value(slices[2], line=line)
-        alr_exits = therl.runtime.VARIABLES.get(name)
+        alr_exits = THERL.runtime.get(name)
 
         if alr_exits is not None:
             alr_exits.set(new_value=value)
             return
 
-        therl.runtime.VARIABLES[name] = Variable(name=name, value=value)
+        THERL.runtime.new(name, value)
 
     elif check_slices[1] == "at":
         slices = string.split(" ", maxsplit=2)
 
         name = slices[0]
-        alr_exits = therl.runtime.VARIABLES.get(name)
+        alr_exits = THERL.runtime.get(name)
         if alr_exits is None:
             print(f"Cannot modify unexisisting array named {name}")
             sys.exit(1)
@@ -44,26 +44,23 @@ def SET(string: str, line: int = 1):
 
         index_and_value = [i.strip() for i in slices[2].split("to")]
         try:
-            index = index_and_value[0]
-            if therl.runtime.VARIABLES.get(index) is not None:
-                if therl.runtime.VARIABLES.get(index).type != int:
-                    print(
-                        f"Invalid index type, expected int found {therl.runtime.VARIABLES.get(index).type.__name__}"
-                    )
-                    sys.exit(1)
-                index = therl.runtime.VARIABLES.get(index).value
-            else:
-                index = int(index)
+            index = int(_decode_value(index_and_value[0], line=line))
 
         except ValueError:
             print("Invalid index type, expected int found str")
             sys.exit(1)
+
         value = index_and_value[1]
+
         try:
-            therl.runtime.VARIABLES[name].value[index] = (
-                _decode_value(value, line=line)
-                if alr_exits.type == list
-                else str(_decode_value(value, line=line))
+            THERL.runtime.change_at_index(
+                name,
+                index,
+                (
+                    _decode_value(value, line=line)
+                    if alr_exits.type == list
+                    else str(_decode_value(value, line=line))
+                ),
             )
         except IndexError:
             print("Index out of range!")
@@ -75,9 +72,9 @@ def SET(string: str, line: int = 1):
 
 
 def SAY(string: str, line: int = 1):
-    from therl.runtime import VARIABLES
+    from therl.api import THERL
 
-    alr_exits = VARIABLES.get(string.strip())
+    alr_exits = THERL.runtime.get(string.strip())
 
     if alr_exits is not None:
         print(alr_exits.value)
@@ -87,12 +84,12 @@ def SAY(string: str, line: int = 1):
 
 
 def CAST(string: str, line: int = 1):
-    import therl.runtime
+    from therl.api import THERL
 
     slices = [s.strip() for s in string.split("to") if s]
     name = slices[0]
     new_type = slices[1]
-    alr_exits = therl.runtime.VARIABLES.get(name)
+    alr_exits = THERL.runtime.get(name)
 
     if alr_exits is None:
         print(f"Variable with name {name} doesnt exist")
@@ -117,44 +114,47 @@ def CAST(string: str, line: int = 1):
 
 
 def ADD(string: str, line: int = 1):
-    import therl.runtime
+    from therl.api import THERL
 
     slices = [s.strip() for s in string.split("to") if s]
     name = slices[1]
-    new_value = _decode_value(slices[0])
-    alr_exits = therl.runtime.VARIABLES.get(name)
+    new_value = _decode_value(slices[0], line=line)
+    alr_exits = THERL.runtime.get(name)
 
     if alr_exits is None:
         print(f"Variable with name {name} doesnt exist")
         sys.exit(1)
 
-    if alr_exits.type != list:
+    if not isinstance(alr_exits.value, (list, str)):
         print(f"Variable must be an array not a {alr_exits.type.__name__}")
         sys.exit(1)
 
-    alr_exits.value.append(new_value)
+    if isinstance(alr_exits.value, list):
+        alr_exits.value.append(new_value)
+    else:
+        alr_exits.value += str(new_value)
 
 
 def RUN(string: str, line: int = 1) -> Any:
-    import therl.runtime
+    from therl.api import THERL
     from therl.functions import Function
 
     slices = [_.strip() for _ in string.split(" ") if _]
 
     func_name = slices[0]
 
-    if therl.runtime.VARIABLES.get(func_name) is None:
+    if THERL.runtime.get(func_name) is None:
         raise UnknownFunction(var_name=func_name, line=line)
 
-    if not isinstance(therl.runtime.VARIABLES.get(func_name).value, Function):
+    if not isinstance(THERL.runtime.get(func_name).value, Function):
         raise RunningNonFunctionObject(
             var_name=func_name,
-            type_=therl.runtime.VARIABLES.get(func_name).type.__name__,
+            type_=THERL.runtime.get(func_name).type.__name__,
             line=line,
         )
 
     if len(slices) == 1:
-        return therl.runtime.VARIABLES[func_name].value.run()
+        return THERL.runtime.get(func_name).value.run()
 
     if slices[1] == "with":
         params: VARIABLES_TYPE = {}
@@ -168,28 +168,28 @@ def RUN(string: str, line: int = 1) -> Any:
 
             name = s[0].strip().replace("<", "").replace(">", "")
 
-            if name not in therl.runtime.VARIABLES.get(func_name).value.params:
+            if name not in THERL.runtime.get(func_name).value.params:
                 print(f"Unknown parameter {name}")
                 sys.exit(1)
 
             value = s[2].strip()
 
-            if therl.runtime.VARIABLES.get(value) is not None:
-                params[name] = therl.runtime.VARIABLES.get(value)
+            if THERL.runtime.get(value) is not None:
+                params[name] = THERL.runtime.get(value)
             else:
                 params[name] = Variable(name=name, value=_decode_value(value))
 
-        return therl.runtime.VARIABLES[func_name].value.run(params=params)
+        return THERL.runtime.get(func_name).value.run(params=params)
 
 
 def RETURN(string: str, line: int = 1) -> Any:
-    import therl.runtime
+    from therl.api import THERL
     from therl.functions import Function
 
     if "with" in string.strip().split(" "):
         slices = string.strip().split("with")
         func_name = slices[0]
-        alr_exists = therl.runtime.VARIABLES.get(func_name.strip())
+        alr_exists = THERL.runtime.get(func_name.strip())
 
         if alr_exists is None:
             raise UnknownFunction(var_name=func_name, line=line)
@@ -200,7 +200,7 @@ def RETURN(string: str, line: int = 1) -> Any:
 
         return RUN(string.strip())
 
-    alr_exists = therl.runtime.VARIABLES.get(string.strip())
+    alr_exists = THERL.runtime.get(string.strip())
 
     if alr_exists is None:
         return _decode_value(string.strip())

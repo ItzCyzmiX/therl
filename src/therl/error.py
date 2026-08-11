@@ -41,3 +41,10 @@ class UnknownFunction(Exception):
         super().__init__(
             f"Invalid Function Name at line {line}\nFunction nammed {var_name} doesnt exist"
         )
+
+
+class UnknownAttribute(Exception):
+    def __init__(self, object_name: str, attr_name: str, line: int):
+        super().__init__(
+            f"Invalid Attribute at line {line}\nAttribute nammed {attr_name} doesnt exist in object {object_name}"
+        )

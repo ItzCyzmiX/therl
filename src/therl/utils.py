@@ -1,20 +1,57 @@
 import sys
 from typing import Any
 
-from therl.error import InvalidType, UnknownVariable
+from therl.error import InvalidType, UnknownVariable, UnknownAttribute
+from therl.variable import Variable
 
 
 def _decode_value(value: str, line: int = 1) -> Any:
-    import therl.runtime
+    from therl.api import THERL
 
-    if value.split(" ")[0].strip() == "run":
+    ssplit = value.split(" ")
+
+    if ssplit[0].strip() == "run":
         from therl.instructions import RUN
 
         func_string = value.split("run", maxsplit=2)[1].strip()
 
-        return RUN(func_string)
+        if "from" in func_string.split(" "):
 
-    if "at" in value.split(" "):
+            slices = func_string.split("from")
+            var_name = slices[1].strip()
+            method = slices[0].strip()
+
+            exists = THERL.runtime.get(var_name=var_name)
+
+            if exists is None:
+                raise UnknownVariable(var_name=var_name, line=line)
+            try:
+                return getattr(exists, method)()
+            except AttributeError:
+                raise UnknownAttribute(
+                    object_name=var_name.capitalize(), attr_name=method, line=line
+                )
+        else:
+            return RUN(func_string)
+
+    if "from" in ssplit:
+
+        slices = value.split("from")
+        var_name = slices[1].strip()
+        method = slices[0].strip()
+
+        exists = THERL.runtime.get(var_name=var_name)
+
+        if exists is None:
+            raise UnknownVariable(var_name=var_name, line=line)
+        try:
+            return getattr(exists, method)
+        except AttributeError:
+            raise UnknownAttribute(
+                object_name=var_name.capitalize(), attr_name=method, line=line
+            )
+
+    if "at" in ssplit:
         slices = value.split("at")
         var_name = slices[0].strip()
 
@@ -23,7 +60,7 @@ def _decode_value(value: str, line: int = 1) -> Any:
             print("Indexing must be done with an int!")
             sys.exit(1)
 
-        var = therl.runtime.VARIABLES.get(var_name)
+        var = THERL.runtime.get(var_name)
 
         if var is None:
             print(f"Variable with name {var} doesnt exist!")
@@ -78,8 +115,8 @@ def _decode_value(value: str, line: int = 1) -> Any:
     except ValueError:
         pass
 
-    if therl.runtime.VARIABLES.get(value) is not None:
-        return therl.runtime.VARIABLES.get(value).value
+    if THERL.runtime.get(value) is not None:
+        return THERL.runtime.get(value).value
 
     raise UnknownVariable(var_name=value, line=line)
 

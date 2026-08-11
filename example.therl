@@ -1,7 +1,3 @@
-func lol
-	return "lala"
-eof
+run heal from player
 
-set name to run lol
-
-say name
+say hp from player
