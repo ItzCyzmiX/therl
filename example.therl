@@ -16,3 +16,6 @@ set list to [run start..run finish]
 set list_two to [1, 2, 3, "str"]
 
 say list_two
+
+
+run list_two

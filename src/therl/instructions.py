@@ -99,13 +99,12 @@ def CAST(string: str, line: int = 1):
     from therl.api import THERL
 
     slices = [s.strip() for s in string.split("to") if s]
-    name = slices[0]
-    new_type = slices[1]
+    name = slices[0].strip()
+    new_type = slices[1].strip()
     alr_exits = THERL.runtime.get(name)
 
     if alr_exits is None:
-        print(f"Variable with name {name} doesnt exist")
-        sys.exit(1)
+        raise UnknownVariable(var_name=name, line=line)
 
     match new_type:
         case "int":
@@ -134,12 +133,12 @@ def ADD(string: str, line: int = 1):
     alr_exits = THERL.runtime.get(name)
 
     if alr_exits is None:
-        print(f"Variable with name {name} doesnt exist")
-        sys.exit(1)
+        raise UnknownVariable(var_name=name, line=line)
 
     if not isinstance(alr_exits.value, (list, str)):
-        print(f"Variable must be an array not a {alr_exits.type.__name__}")
-        sys.exit(1)
+        raise InvalidType(
+            supposed_type="array or str", wrong_type=alr_exits.type.__name__, line=line
+        )
 
     if isinstance(alr_exits.value, list):
         alr_exits.value.append(new_value)
@@ -210,9 +209,10 @@ def RETURN(string: str, line: int = 1) -> Any:
         if alr_exists is None:
             raise UnknownFunction(var_name=func_name, line=line)
 
-        if alr_exists.type != Function:
-            print(f"Variable nammed {func_name} isnt a function!")
-            sys.exit(1)
+        if not isinstance(alr_exists.value, Function):
+            raise RunningNonFunctionObject(
+                var_name=func_name, type_=alr_exists.type.__name__, line=line
+            )
 
         return RUN(string.strip())
 
@@ -221,7 +221,7 @@ def RETURN(string: str, line: int = 1) -> Any:
     if alr_exists is None:
         return _decode_value(string.strip())
 
-    if alr_exists.type == Function:
+    if isinstance(alr_exists.value, Function):
         return alr_exists.value.run()
     else:
         return alr_exists.value
