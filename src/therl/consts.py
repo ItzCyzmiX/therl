@@ -1,17 +1,16 @@
 import re
 
-from .instructions import ADD, CAST, RETURN, RUN, SAY, SET
+from therl.instructions import ADD, RETURN, RUN, SAY, SET
 
 OPERATORS = ["+", "-", "/", "*", "**"]
 INSTRUCTIONS_KEYWORDS = sorted(
-    ["add", "set", "say", "cast", "func", "eof", "run", "return"],
+    ["add", "set", "say", "func", "end", "run", "return"],
     key=len,
     reverse=True,
 )
 INSTRUCTION_TO_FUNC = {
     "say": SAY,
     "set": SET,
-    "cast": CAST,
     "add": ADD,
     "run": RUN,
     "return": RETURN,

@@ -3,9 +3,18 @@ class InvalidSyntax(Exception):
         super().__init__(f"Invalid syntax at line {line}:\n{wrong_syntax} ")
 
 
-class InvalidIndex(Exception):
-    def __init__(self, wrong_index, line: int) -> None:
-        super().__init__()
+class InvalidVariableCasting(Exception):
+    def __init__(self, wrong_type: str, originial_type: str, line: int):
+        super().__init__(
+            f"Invalid type casting at line {line}\nCant cast {originial_type} to {wrong_type}"
+        )
+
+
+class InvalidKeyword(Exception):
+    def __init__(self, wrong_keyword: str, supposed_keyword: str, line: int):
+        super().__init__(
+            f'Invalid keyword at line {line}, "{wrong_keyword}"\nExcpected {supposed_keyword}'
+        )
 
 
 class IndexOutOfRange(Exception):

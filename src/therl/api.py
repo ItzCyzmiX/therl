@@ -1,4 +1,3 @@
-import sys
 from typing import Any
 import re
 from therl.error import NameInUse, UnknownVariable
@@ -17,13 +16,11 @@ class Runtime:
 
     def set(self, var_name: str, value: Any):
         var = self.VARIABLES.get(var_name)
-        if not var:
-            print(f"Variable named {var_name} doesnt exist")
-            sys.exit(1)
-
-        var.set(value)
+        if var:
+            var.set(value)
 
     def new(self, var_name: str, value: Any):
+
         self.VARIABLES[var_name] = Variable(name=var_name, value=value)
 
     def change_at_index(self, var_name: str, index: int, value: Any):

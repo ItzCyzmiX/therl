@@ -19,13 +19,13 @@ class Function:
         return f"function: {self.name}"
 
     def run(self, params: VARIABLES_TYPE | None = None) -> Any:
-        import therl.runtime
+        from therl.api import THERL
         from therl.consts import INSTRUCTION_TO_FUNC
 
         if self.instructions is None:
             return
 
-        therl.runtime.VARIABLES = therl.runtime.VARIABLES | (params or {})
+        THERL.runtime.VARIABLES = THERL.runtime.VARIABLES | (params or {})
 
         for instruction in self.instructions:
             action = instruction[0]

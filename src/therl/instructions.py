@@ -1,9 +1,9 @@
 import re
-import sys
 from typing import Any
 
 from therl.error import (
     IndexOutOfRange,
+    InvalidKeyword,
     InvalidSyntax,
     InvalidType,
     RunningNonFunctionObject,
@@ -19,18 +19,18 @@ from therl.variable import Variable
 def SET(string: str, line: int = 1):
     from therl.api import THERL
 
-    check_slices = string.split(" ")
+    check_slices = [s.strip() for s in string.split(" ")]
 
     if check_slices[1] == "to":
         slices = string.split(" ", maxsplit=2)
 
-        name = slices[0]
+        name = slices[0].strip()
 
         value = _decode_value(slices[2], line=line)
         alr_exits = THERL.runtime.get(name)
 
         if alr_exits is not None:
-            alr_exits.set(new_value=value)
+            alr_exits.set(new_value=value, line=line)
             return
 
         THERL.runtime.new(name, value)
@@ -81,49 +81,50 @@ def SET(string: str, line: int = 1):
             )
     else:
         raise InvalidSyntax(
-            wrong_syntax=f"Expected 'to' or 'at' in variable assignment, found {check_slices[1]}"
+            wrong_syntax=f"Expected 'to' or 'at' in variable assignment, found {check_slices[1]}",
+            line=line,
         )
 
 
 def SAY(string: str, line: int = 1):
     from therl.api import THERL
 
-    alr_exits = THERL.runtime.get(string.strip())
-
-    if alr_exits is not None:
-        print(alr_exits.value)
-        return
-
     print(_decode_value(string, line=line))
 
 
-def CAST(string: str, line: int = 1):
-    from therl.api import THERL
+# NO LONGER VALID AS IT BREAKS THE STRICT TYPING
+# USE INLINE TYPE CONVERTION (check therl.utils._decode_value)
 
-    slices = [s.strip() for s in string.split("to") if s]
-    name = slices[0].strip()
-    new_type = slices[1].strip()
-    alr_exits = THERL.runtime.get(name)
+# def CAST(string: str, line: int = 1):
+#     from therl.api import THERL
 
-    if alr_exits is None:
-        raise UnknownVariable(var_name=name, line=line)
+#     slices = [s.strip() for s in string.split("to") if s]
+#     name = slices[0].strip()
+#     new_type = slices[1].strip()
+#     alr_exits = THERL.runtime.get(name)
 
-    match new_type:
-        case "int":
-            alr_exits.cast(int)
+#     if alr_exits is None:
+#         raise UnknownVariable(var_name=name, line=line)
 
-        case "float":
-            alr_exits.cast(float)
+#     match new_type:
+#         case "int":
+#             alr_exits.cast(int)
 
-        case "string":
-            alr_exits.cast(str)
+#         case "float":
+#             alr_exits.cast(float)
 
-        case "array":
-            alr_exits.cast(list)
+#         case "string":
+#             alr_exits.cast(str)
 
-        case _:
-            print(f"Invalid type {new_type}")
-            sys.exit(1)
+#         case "array":
+#             alr_exits.cast(list)
+
+#         case _:
+#             raise InvalidKeyword(
+#                 wrong_keyword=new_type,
+#                 supposed_keyword="int, float, string, array",
+#                 line=line,
+#             )
 
 
 def ADD(string: str, line: int = 1):
@@ -177,7 +178,8 @@ def RUN(string: str, line: int = 1) -> Any:
             s = [_.strip() for _ in re.split(re.escape(" "), param) if _]
             if s[1] != "as":
                 raise InvalidSyntax(
-                    wrong_syntax=f"Expected as in parameter assignment, found {s[1]}"
+                    wrong_syntax=f"Expected as in parameter assignment, found {s[1]}",
+                    line=line,
                 )
 
             name = s[0].strip().replace("<", "").replace(">", "")
