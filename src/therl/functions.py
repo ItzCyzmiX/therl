@@ -3,7 +3,7 @@ from typing import Any
 import re
 from therl.error import UnknownInstruction
 from therl.types import VARIABLES_TYPE
-from therl.utils import _decode_condition
+from therl.utils import _decode_value
 from therl.consts import pattern
 
 
@@ -38,7 +38,7 @@ class Function:
 
             if action == "if":
                 condition = instruction[0][1]
-                cur_condition_met = _decode_condition(condition, instruction[1])
+                cur_condition_met = _decode_value(condition, instruction[1])
                 i += 1
                 instruction = self.instructions[i]
 

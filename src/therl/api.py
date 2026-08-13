@@ -1,7 +1,7 @@
 from typing import Any
 import re
 from therl.error import NameInUse, UnknownInstruction, UnknownVariable
-from therl.utils import _decode_condition
+from therl.utils import _decode_value
 from therl.variable import Variable
 
 from therl.consts import pattern, params_pattern, INSTRUCTION_TO_FUNC
@@ -62,9 +62,7 @@ class Therl:
 
             if action == "if":
                 condition = tokens[1]
-                cur_condition_met = _decode_condition(
-                    value=condition, line=instruction[1]
-                )
+                cur_condition_met = _decode_value(value=condition, line=instruction[1])
                 i += 1
                 instruction = instructions[i]
 

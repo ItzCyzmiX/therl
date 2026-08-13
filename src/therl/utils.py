@@ -54,6 +54,11 @@ def _decode_value(value: str, line: int = 1) -> Any:
     if used_basic is not None:
         return used_basic
 
+    is_condition = _decode_condition(value=value, line=line)
+
+    if is_condition is not None:
+        return is_condition
+
     from therl.api import THERL
 
     # check if its another variable, then get its value
