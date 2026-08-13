@@ -1,0 +1,7 @@
+set name to "bob"
+
+if name == "bob"
+    say "go away"
+else
+    say "hello " + name
+end
