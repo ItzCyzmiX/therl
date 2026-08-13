@@ -1,0 +1,8 @@
+set x to "bombo" + "clat"
+
+set name to 10 / 10 + 100 as string 
+
+
+set full to x + " " + name + " !"
+
+say full

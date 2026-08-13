@@ -1,3 +1,4 @@
+import re
 from typing import Any
 
 from therl.error import (
@@ -8,6 +9,7 @@ from therl.error import (
     UnknownVariable,
     UnknownAttribute,
 )
+from therl.lib import simpleval
 
 
 def _decode_value(value: str, line: int = 1) -> Any:
@@ -16,7 +18,12 @@ def _decode_value(value: str, line: int = 1) -> Any:
     if value[0] == "[" and value[-1] == "]":
         return _decode_array(value, line=line)
 
-    ssplit = [s.strip() for s in value.split(" ")]
+    ssplit = [
+        s.strip()
+        for s in re.split(
+            f"({'|'.join(map(re.escape, ['as', 'to', "from", "run"]))})", value
+        )
+    ]
 
     # check running a function (getting its return value)
     if ssplit[0].strip() == "run":
@@ -81,17 +88,15 @@ def _decode_basic_value(value: str) -> str | int | float | bool | None:
 
 def _decode_expr(value: str, line: int) -> Any | None:
     import therl.consts
+    from therl.api import THERL
 
     used_operator = not set(value.split(" ")).isdisjoint(therl.consts.OPERATORS)
 
     if used_operator:
         try:
-            return eval(
-                value,
-                None,
-                {
-                    var[0]: var[1].value for var in therl.runtime.VARIABLES.items()
-                },  # will it be unsafe in this case ?
+            return simpleval.simple_eval(
+                expr=value,
+                names={var[0]: var[1].value for var in THERL.runtime.VARIABLES.items()},
             )
         except NameError as e:
             raise UnknownVariable(var_name=e.name, line=line)
@@ -134,22 +139,21 @@ def _decode_type_cast(value: str, line: int) -> int | float | str | list:
 
     exists = THERL.runtime.get(var_name=var_name)
 
-    if exists is None:
-        raise UnknownVariable(var_name=var_name, line=line)
+    cast_value = exists.value if exists else _decode_value(var_name)
 
     try:
         match cast_to_type:
             case "int":
-                return int(exists.value)
+                return int(cast_value)
 
             case "float":
-                return float(exists.value)
+                return float(cast_value)
 
             case "string":
-                return str(exists.value)
+                return str(cast_value)
 
             case "array":
-                return list(exists.value)
+                return list(cast_value)
 
             case _:
                 raise InvalidKeyword(
