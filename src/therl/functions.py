@@ -1,7 +1,10 @@
 import sys
 from typing import Any
-
+import re
+from therl.error import UnknownInstruction
 from therl.types import VARIABLES_TYPE
+from therl.utils import _decode_condition
+from therl.consts import pattern
 
 
 class Function:
@@ -26,15 +29,40 @@ class Function:
             return
 
         THERL.runtime.VARIABLES = THERL.runtime.VARIABLES | (params or {})
+        i = 0
+        cur_condition_met = None
+        while i < len(self.instructions):
+            instruction = self.instructions[i]
 
-        for instruction in self.instructions:
-            action = instruction[0]
+            action = instruction[0][0]
 
+            if action == "if":
+                condition = instruction[0][1]
+                cur_condition_met = _decode_condition(condition, instruction[1])
+                i += 1
+                instruction = self.instructions[i]
+
+                action = instruction[0][0]
+
+            if action == "else":
+                cur_condition_met = not cur_condition_met
+                i += 1
+                instruction = self.instructions[i]
+
+                action = instruction[0][0]
+
+            if action == "end":
+                if cur_condition_met is not None:
+                    cur_condition_met = None
+                i += 1
+                continue
+
+            if action == "return":
+
+                return INSTRUCTION_TO_FUNC[action](instruction[0][1], instruction[1])
             try:
-                if action == "return":
-                    return INSTRUCTION_TO_FUNC[action](instruction[1])
-
-                INSTRUCTION_TO_FUNC[action](instruction[1])
+                if cur_condition_met is None or cur_condition_met:
+                    INSTRUCTION_TO_FUNC[action](instruction[0][1], instruction[1])
             except (KeyError, IndexError):
-                print("invalid instruction:", str(instruction))
-                sys.exit(1)
+                raise UnknownInstruction(instruction_name=action, line=instruction[1])
+            i += 1

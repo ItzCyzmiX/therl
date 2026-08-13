@@ -38,6 +38,13 @@ class UnknownParameter(Exception):
         )
 
 
+class UnknownInstruction(Exception):
+    def __init__(self, instruction_name: str, line: int):
+        super().__init__(
+            f"Invalid Instruction at line {line}\nInstruction nammed {instruction_name} doesnt exist"
+        )
+
+
 class UnknownVariable(Exception):
     def __init__(self, var_name: str, line: int):
         super().__init__(

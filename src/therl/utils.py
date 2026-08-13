@@ -21,7 +21,7 @@ def _decode_value(value: str, line: int = 1) -> Any:
     ssplit = [
         s.strip()
         for s in re.split(
-            f"({'|'.join(map(re.escape, ['as', 'to', "from", "run"]))})", value
+            f"({'|'.join(map(re.escape, ['as', 'to', "from", "run", "at"]))})", value
         )
     ]
 
@@ -30,7 +30,6 @@ def _decode_value(value: str, line: int = 1) -> Any:
         return _decode_run_instruction(value=value, line=line)
 
     if len(ssplit) > 2:
-
         # check type casting
         if ssplit[1] == "as":
             return _decode_type_cast(value=value, line=line)
@@ -62,6 +61,19 @@ def _decode_value(value: str, line: int = 1) -> Any:
         return THERL.runtime.get(value).value
 
     raise UnknownVariable(var_name=value, line=line)
+
+
+def _decode_condition(value: str, line: int) -> bool | None:
+    from therl.api import THERL
+
+    try:
+        ret = _decode_value(value=value, line=line)
+        return ret
+    except:
+        return simpleval.simple_eval(
+            value,
+            names={var[0]: var[1].value for var in THERL.runtime.VARIABLES.items()},
+        )
 
 
 def _decode_basic_value(value: str) -> str | int | float | bool | None:
