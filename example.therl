@@ -2,9 +2,9 @@ set name to "bob"
 set ids to 10
 
 if nn == "bob"
-    if nigas == 10
-        say "go away"
-    end
+    
+    say "go away"
+    
 else
     say "hello " + name
 end
