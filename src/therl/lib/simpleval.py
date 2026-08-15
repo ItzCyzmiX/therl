@@ -319,7 +319,9 @@ class FunctionNotDefined(InvalidExpression):
     """sorry! That function isn't defined!"""
 
     def __init__(self, func_name, expression):
-        self.message = f"Function '{func_name}' not defined, for expression '{expression}'."
+        self.message = (
+            f"Function '{func_name}' not defined, for expression '{expression}'."
+        )
         self.func_name = func_name  # bypass 2to3 confusion.
         self.expression = expression
 
@@ -415,7 +417,9 @@ class ModuleWrapper:
     def __getattr__(self, name):
         # Block private/magic attributes
         if name.startswith("_"):
-            raise FeatureNotAvailable(f"Access to private attribute '{name}' is not allowed")
+            raise FeatureNotAvailable(
+                f"Access to private attribute '{name}' is not allowed"
+            )
 
         # Check if attribute is in disallowed methods list
         if name in DISALLOW_METHODS:
@@ -423,7 +427,9 @@ class ModuleWrapper:
 
         # Check allowed_attrs whitelist if specified
         if self._allowed_attrs is not None and name not in self._allowed_attrs:
-            raise FeatureNotAvailable(f"Access to '{name}' is not allowed on this wrapped module")
+            raise FeatureNotAvailable(
+                f"Access to '{name}' is not allowed on this wrapped module"
+            )
 
         return getattr(self._module, name)
 
@@ -460,8 +466,14 @@ def safe_mult(a, b):  # pylint: disable=invalid-name
 def safe_add(a, b):  # pylint: disable=invalid-name
     """iterable length limit again"""
 
-    if hasattr(a, "__len__") and hasattr(b, "__len__") and len(a) + len(b) > MAX_STRING_LENGTH:
-        raise IterableTooLong("Sorry, adding those two together would make something too long.")
+    if (
+        hasattr(a, "__len__")
+        and hasattr(b, "__len__")
+        and len(a) + len(b) > MAX_STRING_LENGTH
+    ):
+        raise IterableTooLong(
+            "Sorry, adding those two together would make something too long."
+        )
     return a + b
 
 
@@ -671,13 +683,15 @@ class SimpleEval:  # pylint: disable=too-few-public-methods
 
     def _eval_assign(self, node):
         warnings.warn(
-            f"Assignment ({self.expr}) attempted, but this is ignored", AssignmentAttempted
+            f"Assignment ({self.expr}) attempted, but this is ignored",
+            AssignmentAttempted,
         )
         return self._eval(node.value)
 
     def _eval_aug_assign(self, node):
         warnings.warn(
-            f"Assignment ({self.expr}) attempted, but this is ignored", AssignmentAttempted
+            f"Assignment ({self.expr}) attempted, but this is ignored",
+            AssignmentAttempted,
         )
         return self._eval(node.value)
 
@@ -745,7 +759,9 @@ class SimpleEval:  # pylint: disable=too-few-public-methods
         return to_return
 
     def _eval_ifexp(self, node):
-        return self._eval(node.body) if self._eval(node.test) else self._eval(node.orelse)
+        return (
+            self._eval(node.body) if self._eval(node.test) else self._eval(node.orelse)
+        )
 
     def _eval_call(self, node):
         if isinstance(node.func, ast.Attribute):
@@ -762,7 +778,8 @@ class SimpleEval:  # pylint: disable=too-few-public-methods
                 raise FeatureNotAvailable("This function is forbidden")
 
         return func(
-            *(self._eval(a) for a in node.args), **dict(self._eval(k) for k in node.keywords)
+            *(self._eval(a) for a in node.args),
+            **dict(self._eval(k) for k in node.keywords),
         )
 
     def _eval_keyword(self, node):
@@ -813,7 +830,9 @@ class SimpleEval:  # pylint: disable=too-few-public-methods
                     f"({node.attr})"
                 )
         if node.attr in DISALLOW_METHODS:
-            raise FeatureNotAvailable(f"Sorry, this method is not available. ({node.attr})")
+            raise FeatureNotAvailable(
+                f"Sorry, this method is not available. ({node.attr})"
+            )
 
         # Evaluate "node" - the thing that we're trying to access an attr of first:
         node_evaluated = self._eval(node.value)
@@ -850,7 +869,9 @@ class SimpleEval:  # pylint: disable=too-few-public-methods
 
         if item is not _ATTR_NOT_FOUND:
             if isinstance(item, types.ModuleType):
-                raise FeatureNotAvailable("Sorry, modules are not allowed in attribute access")
+                raise FeatureNotAvailable(
+                    "Sorry, modules are not allowed in attribute access"
+                )
             if callable(item) and item in DISALLOW_FUNCTIONS:
                 raise FeatureNotAvailable("This function is forbidden")
             return item
@@ -1005,6 +1026,7 @@ class EvalWithCompoundTypes(SimpleEval):
 
 def simple_eval(expr, operators=None, functions=None, names=None, allowed_attrs=None):
     """Simply evaluate an expression"""
+
     s = SimpleEval(
         operators=operators,
         functions=functions,
@@ -1012,3 +1034,4 @@ def simple_eval(expr, operators=None, functions=None, names=None, allowed_attrs=
         allowed_attrs=allowed_attrs,
     )
     return s.eval(expr)
+

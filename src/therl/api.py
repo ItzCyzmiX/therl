@@ -48,7 +48,7 @@ class Therl:
         ]
 
         i = 0
-        cur_condition_met = None
+        cur_conditions_met: list[bool] = []
 
         while i < len(instructions):
             instruction = instructions[i]
@@ -62,7 +62,11 @@ class Therl:
 
             if action == "if":
                 condition = tokens[1]
-                cur_condition_met = _decode_value(value=condition, line=instruction[1])
+
+                cur_conditions_met.append(
+                    _decode_value(value=condition, line=instruction[1])
+                )
+
                 i += 1
                 instruction = instructions[i]
 
@@ -76,7 +80,7 @@ class Therl:
                 arg = "".join(tokens[1:])
 
             if action == "else":
-                cur_condition_met = not cur_condition_met
+                cur_conditions_met.pop()
                 i += 1
                 instruction = instructions[i]
 
@@ -90,10 +94,22 @@ class Therl:
                 arg = "".join(tokens[1:])
 
             if action == "end":
-                if cur_condition_met is not None:
-                    cur_condition_met = None
+                if len(cur_conditions_met):
+                    cur_conditions_met.pop()
 
-            elif action == "func":
+                i += 1
+                instruction = instructions[i]
+
+                tokens = [
+                    t.strip()
+                    for t in re.split(pattern, instruction[0], maxsplit=1)
+                    if t
+                ]
+
+                action = tokens[0]
+                arg = "".join(tokens[1:])
+
+            if action == "func":
                 name_and_params = [l.strip() for l in arg.split(" ") if l]
                 func_name = name_and_params[0]
                 func_instructions = []
@@ -147,18 +163,23 @@ class Therl:
                     func_instructions.append((inner_tokens, instruction[1]))
 
                     i += 1
-            else:
-                try:
-                    if cur_condition_met is None or cur_condition_met:
-                        INSTRUCTION_TO_FUNC[action](arg, instruction[1])
-                except KeyError:
+
+            try:
+                print(cur_conditions_met)
+                if len(cur_conditions_met) == 0 or all(cur_conditions_met):
+                    INSTRUCTION_TO_FUNC[action](arg, instruction[1])
+
+            except KeyError:
+                if action not in ["func", "if", "else", "end"]:
+
                     raise UnknownInstruction(
                         instruction_name=action, line=instruction[1]
                     )
+
             i += 1
 
-        if cur_condition_met is not None:
-            print("forgot trailing if")
+        # if cur_condition_met is not None:
+        #     print("forgot trailing if")
 
 
 THERL = Therl()

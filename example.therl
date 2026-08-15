@@ -1,7 +1,10 @@
 set name to "bob"
+set ids to 10
 
-if name == "bob"
-    say "go away"
+if nn == "bob"
+    if nigas == 10
+        say "go away"
+    end
 else
     say "hello " + name
 end
