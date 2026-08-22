@@ -12,7 +12,7 @@ func greet <name>
 
     say greeting + " " + name + "!"
 
-eof
+end
 
 func main
 
@@ -22,7 +22,7 @@ func main
 
     say numbers
 
-eof
+end
 
 run main
 ```
@@ -80,7 +80,7 @@ func main
 
     say ids
 
-eof
+end
 
 run main
 ```
