@@ -2,6 +2,7 @@ import re
 from typing import Any
 
 from therl.error import (
+    DividingByZero,
     IndexOutOfRange,
     InvalidKeyword,
     InvalidType,
