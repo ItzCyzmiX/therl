@@ -21,13 +21,15 @@ def _decode_value(value: str, line: int = 1) -> Any:
     ssplit = [
         s.strip()
         for s in re.split(
-            f"({'|'.join(map(re.escape, [' as ', ' to ', " from ", " run ", " at "]))})",
+            f"({'|'.join(map(re.escape, [' as ', ' to ', " from ", "run ", " at "]))})",
             value,
         )
+        if s
     ]
 
     # check running a function (getting its return value)
     if ssplit[0].strip() == "run":
+
         return _decode_run_instruction(value=value, line=line)
 
     if len(ssplit) > 2:
@@ -67,6 +69,9 @@ def _decode_value(value: str, line: int = 1) -> Any:
 def _decode_condition(value: str, line: int) -> bool | None:
     from therl.api import THERL
 
+    if value.strip() in ["true", "false"]:
+        return True if value == "true" else False
+
     try:
         return simpleval.simple_eval(
             value,
@@ -80,9 +85,9 @@ def _decode_basic_value(value: str) -> str | int | float | bool | None:
     if value.strip()[0] == value.strip()[-1] == '"':
         return str(value[1:-1])
 
-    if value.strip().lower() == "true":
+    if value.strip() == "true":
         return True
-    if value.strip().lower() == "false":
+    if value.strip() == "false":
         return False
 
     # Try Integer
@@ -112,6 +117,8 @@ def _decode_expr(value: str, line: int) -> Any | None:
             )
         except NameError as e:
             raise UnknownVariable(var_name=e.name, line=line)
+        except ZeroDivisionError:
+            raise DividingByZero(line=line)
 
 
 def _decode_run_instruction(value: str, line: int) -> Any:

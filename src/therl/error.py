@@ -17,6 +17,11 @@ class InvalidKeyword(Exception):
         )
 
 
+class DividingByZero(Exception):
+    def __init__(self, line: int):
+        super().__init__(f"Cannot devide by zero in line {line}! ")
+
+
 class IndexOutOfRange(Exception):
     def __init__(self, index, max_index, line) -> None:
         super().__init__(

@@ -1,10 +1,14 @@
 set name to "bob"
 set ids to 10
 
-if nn == "bob"
+func eh
+    if name == "bob" and ids == 10
     
-    say "go away"
+        say "go away"
     
-else
-    say "hello " + name
-end
+    else
+        say "hello " + name
+    end
+end 
+
+run eh

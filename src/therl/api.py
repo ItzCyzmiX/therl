@@ -1,6 +1,12 @@
 from typing import Any
 import re
-from therl.error import NameInUse, UnknownInstruction, UnknownVariable
+from therl.error import (
+    InvalidKeyword,
+    InvalidSyntax,
+    NameInUse,
+    UnknownInstruction,
+    UnknownVariable,
+)
 from therl.utils import _decode_condition
 from therl.variable import Variable
 
@@ -51,6 +57,7 @@ class Therl:
         cur_conditions_met: list[bool] = []
 
         while i < len(instructions):
+
             instruction = instructions[i]
 
             tokens = [
@@ -62,52 +69,20 @@ class Therl:
 
             if action == "if":
                 condition = tokens[1]
-                cur_condition_met = _decode_condition(
-                    value=condition, line=instruction[1]
+
+                cur_conditions_met.append(
+                    _decode_condition(value=condition, line=instruction[1])
                 )
-                i += 1
-                instruction = instructions[i]
 
-                tokens = [
-                    t.strip()
-                    for t in re.split(pattern, instruction[0], maxsplit=1)
-                    if t
-                ]
+            elif action == "else":
+                if cur_conditions_met:
+                    cur_conditions_met[-1] = not cur_conditions_met[-1]
 
-                action = tokens[0]
-                arg = "".join(tokens[1:])
-
-            if action == "else":
-                cur_conditions_met.pop()
-                i += 1
-                instruction = instructions[i]
-
-                tokens = [
-                    t.strip()
-                    for t in re.split(pattern, instruction[0], maxsplit=1)
-                    if t
-                ]
-
-                action = tokens[0]
-                arg = "".join(tokens[1:])
-
-            if action == "end":
-                if len(cur_conditions_met):
+            elif action == "end":
+                if cur_conditions_met:
                     cur_conditions_met.pop()
 
-                i += 1
-                instruction = instructions[i]
-
-                tokens = [
-                    t.strip()
-                    for t in re.split(pattern, instruction[0], maxsplit=1)
-                    if t
-                ]
-
-                action = tokens[0]
-                arg = "".join(tokens[1:])
-
-            if action == "func":
+            elif action == "func":
                 name_and_params = [l.strip() for l in arg.split(" ") if l]
                 func_name = name_and_params[0]
                 func_instructions = []
@@ -162,22 +137,17 @@ class Therl:
 
                     i += 1
 
-            try:
-                print(cur_conditions_met)
-                if len(cur_conditions_met) == 0 or all(cur_conditions_met):
-                    INSTRUCTION_TO_FUNC[action](arg, instruction[1])
+            else:
+                try:
+                    if not cur_conditions_met or all(cur_conditions_met):
+                        INSTRUCTION_TO_FUNC[action](arg, instruction[1])
 
-            except KeyError:
-                if action not in ["func", "if", "else", "end"]:
-
+                except KeyError:
                     raise UnknownInstruction(
                         instruction_name=action, line=instruction[1]
                     )
 
             i += 1
-
-        # if cur_condition_met is not None:
-        #     print("forgot trailing if")
 
 
 THERL = Therl()

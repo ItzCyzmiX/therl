@@ -30,7 +30,8 @@ class Function:
 
         THERL.runtime.VARIABLES = THERL.runtime.VARIABLES | (params or {})
         i = 0
-        cur_condition_met = None
+        cur_conditions_met: list[bool] = []
+
         while i < len(self.instructions):
             instruction = self.instructions[i]
 
@@ -38,31 +39,28 @@ class Function:
 
             if action == "if":
                 condition = instruction[0][1]
-                cur_condition_met = _decode_condition(condition, instruction[1])
-                i += 1
-                instruction = self.instructions[i]
 
-                action = instruction[0][0]
+                cur_conditions_met.append(
+                    _decode_condition(value=condition, line=instruction[1])
+                )
 
-            if action == "else":
-                cur_condition_met = not cur_condition_met
-                i += 1
-                instruction = self.instructions[i]
+            elif action == "else":
+                if cur_conditions_met:
+                    cur_conditions_met[-1] = not cur_conditions_met[-1]
 
-                action = instruction[0][0]
+            elif action == "end":
+                if cur_conditions_met:
+                    cur_conditions_met.pop()
 
-            if action == "end":
-                if cur_condition_met is not None:
-                    cur_condition_met = None
-                i += 1
-                continue
-
-            if action == "return":
+            elif action == "return":
 
                 return INSTRUCTION_TO_FUNC[action](instruction[0][1], instruction[1])
-            try:
-                if cur_condition_met is None or cur_condition_met:
-                    INSTRUCTION_TO_FUNC[action](instruction[0][1], instruction[1])
-            except (KeyError, IndexError):
-                raise UnknownInstruction(instruction_name=action, line=instruction[1])
+            else:
+                try:
+                    if not cur_conditions_met or all(cur_conditions_met):
+                        INSTRUCTION_TO_FUNC[action](instruction[0][1], instruction[1])
+                except (KeyError, IndexError):
+                    raise UnknownInstruction(
+                        instruction_name=action, line=instruction[1]
+                    )
             i += 1
