@@ -31,7 +31,7 @@ Output:
 
 ```text
 hello Jeff!
-[1, 2, 3, 4, 5, 6, 7, 8, 9]
+[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 ```
 
 ---
@@ -47,6 +47,7 @@ hello Jeff!
 - 🧩 Functions with named parameters
 - 📢 Simple `say` statement for output
 - ✏️ Mutable list elements
+- 🔀 Conditional statements with `if`, `else if`, and `else`
 - 🚀 Easy to extend
 
 ---
@@ -60,7 +61,7 @@ func greet <name>
 
     say greeting + " " + name + "!"
 
-eof
+end
 
 func main
 
@@ -90,9 +91,43 @@ Output:
 ```text
 Welcome!
 hello Jeff!
-[1, 2, 3, 4, 5, 6, 7, 8, 9]
-[1000, 2, 3, 4, 5, 6, 7, 8, 9]
+[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 [1000, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+[1000, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10]
+```
+
+---
+
+## Conditional Statements
+
+Therl supports `if`, `else if`, and `else` for conditional logic:
+
+```therl
+set score to 85
+
+if score >= 90
+
+    say "Grade: A"
+
+else if score >= 80
+
+    say "Grade: B"
+
+else if score >= 70
+
+    say "Grade: C"
+
+else
+
+    say "Grade: F"
+
+end
+```
+
+Output:
+
+```text
+Grade: B
 ```
 
 ---
@@ -131,8 +166,8 @@ Expect missing features, breaking changes, and plenty of experimentation as the 
 
 # Roadmap
 
+- [x] Conditional statements
 - [ ] Arithmetic expressions
-- [ ] Conditional statements
 - [ ] Loops
 - [ ] Dictionaries / Maps
 - [ ] Modules
