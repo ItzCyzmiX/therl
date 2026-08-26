@@ -100,26 +100,16 @@ hello Jeff!
 
 ## Conditional Statements
 
-Therl supports `if`, `else if`, and `else` for conditional logic:
+Therl supports `if`  and `else` for conditional logic:
 
 ```therl
-set score to 85
+set name to "bob"
 
-if score >= 90
-
-    say "Grade: A"
-
-else if score >= 80
-
-    say "Grade: B"
-
-else if score >= 70
-
-    say "Grade: C"
-
+if name == "bob"
+    say "Go away bob!"
 else
 
-    say "Grade: F"
+    say "Hello " + name
 
 end
 ```
@@ -127,7 +117,7 @@ end
 Output:
 
 ```text
-Grade: B
+Go away bob!
 ```
 
 ---
