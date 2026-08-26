@@ -1,14 +1,11 @@
-set name to "bob"
-set ids to 10
-
-func eh
-    if name == "bob" and ids == 10
-    
-        say "go away"
-    
+func pick
+    if nigas
+        say "if"
+    elseif true
+        say "elseif"
     else
-        say "hello " + name
+        say "else"
     end
-end 
+end
 
-run eh
+run pick

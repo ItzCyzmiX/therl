@@ -44,18 +44,18 @@ class Therl:
     def register_object(self, name: str, object: Variable):
         self.runtime.new_object(obj_name=name, object=object)
 
-    def run(self, code: str):
+    def run(self, code: str, starting_line_num: int = 0):
         """[instruction string, line number (for errors)]"""
 
         instructions = [
-            [line.strip(), line_num + 1]
+            [line.strip(), line_num + starting_line_num + 1]
             for line_num, line in enumerate(code.split("\n"))
             if line.strip()
         ]
 
         i = 0
         cur_conditions_met: list[bool] = []
-
+        skip = False
         while i < len(instructions):
 
             instruction = instructions[i]
@@ -73,6 +73,17 @@ class Therl:
                 cur_conditions_met.append(
                     _decode_condition(value=condition, line=instruction[1])
                 )
+
+            elif action == "elseif":
+                if cur_conditions_met[-1]:
+                    skip = True
+                elif cur_conditions_met and not cur_conditions_met[-1]:
+
+                    condition = tokens[1]
+
+                    cur_conditions_met[-1] = _decode_condition(
+                        value=condition, line=instruction[1]
+                    )
 
             elif action == "else":
                 if cur_conditions_met:
@@ -136,12 +147,15 @@ class Therl:
                     func_instructions.append((inner_tokens, instruction[1]))
 
                     i += 1
-
+            elif action == "return":
+                return INSTRUCTION_TO_FUNC[action](instruction[0][1], instruction[1])
             else:
                 try:
-                    if not cur_conditions_met or all(cur_conditions_met):
-                        INSTRUCTION_TO_FUNC[action](arg, instruction[1])
-
+                    if not skip:
+                        if not cur_conditions_met or all(cur_conditions_met):
+                            INSTRUCTION_TO_FUNC[action](arg, instruction[1])
+                    else:
+                        skip = False
                 except KeyError:
                     raise UnknownInstruction(
                         instruction_name=action, line=instruction[1]

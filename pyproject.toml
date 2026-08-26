@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "therl"
-version = "0.1.0"
+version = "0.1.1"
 description = "A human readable programming language"
 authors = [
   { name="CyzmiX", email="itzmedigamingx@gmail.com" },

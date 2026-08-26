@@ -4,7 +4,20 @@ from therl.instructions import ADD, RETURN, RUN, SAY, SET
 
 OPERATORS = ["+", "-", "/", "*", "**"]
 INSTRUCTIONS_KEYWORDS = sorted(
-    ["add", "set", "say", "func", "end", "run", "return", "if", "foreach", "while"],
+    [
+        "add",
+        "set",
+        "say",
+        "func",
+        "end",
+        "run",
+        "return",
+        "if",
+        "foreach",
+        "while",
+        "else",
+        "elseif",
+    ],
     key=len,
     reverse=True,
 )

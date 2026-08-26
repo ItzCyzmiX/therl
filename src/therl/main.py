@@ -3,9 +3,9 @@ from therl.api import THERL
 
 
 def main():
-    # sys.excepthook = lambda type, value, traceback: print(
-    #     f"{type.__name__} Error:\n\n{value}"
-    # )
+    sys.excepthook = lambda type, value, traceback: print(
+        f"{type.__name__} Error:\n\n{value}"
+    )
 
     code_str = ""
 
