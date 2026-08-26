@@ -31,7 +31,7 @@ Output:
 
 ```text
 hello Jeff!
-[1, 2, 3, 4, 5, 6, 7, 8, 9]
+[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 ```
 
 ---
@@ -47,6 +47,7 @@ hello Jeff!
 - 🧩 Functions with named parameters
 - 📢 Simple `say` statement for output
 - ✏️ Mutable list elements
+- 🔀 Conditional statements with `if`, `else if`, and `else`
 - 🚀 Easy to extend
 
 ---
@@ -60,7 +61,7 @@ func greet <name>
 
     say greeting + " " + name + "!"
 
-eof
+end
 
 func main
 
@@ -90,9 +91,33 @@ Output:
 ```text
 Welcome!
 hello Jeff!
-[1, 2, 3, 4, 5, 6, 7, 8, 9]
-[1000, 2, 3, 4, 5, 6, 7, 8, 9]
+[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 [1000, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+[1000, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10]
+```
+
+---
+
+## Conditional Statements
+
+Therl supports `if`  and `else` for conditional logic:
+
+```therl
+set name to "bob"
+
+if name == "bob"
+    say "Go away bob!"
+else
+
+    say "Hello " + name
+
+end
+```
+
+Output:
+
+```text
+Go away bob!
 ```
 
 ---
@@ -131,13 +156,13 @@ Expect missing features, breaking changes, and plenty of experimentation as the 
 
 # Roadmap
 
-- [ ] Arithmetic expressions
-- [ ] Conditional statements
+- [x] Conditional statements
+- [x] Arithmetic expressions
 - [ ] Loops
 - [ ] Dictionaries / Maps
 - [ ] Modules
 - [ ] Classes
-- [ ] Error reporting with line numbers
+- [x] Error reporting with line numbers
 - [ ] Standard library
 
 ---
