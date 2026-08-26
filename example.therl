@@ -1,5 +1,5 @@
 func pick
-    if nigas
+    if false
         say "if"
     elseif true
         say "elseif"
