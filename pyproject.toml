@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "therl"
-version = "0.1.1"
+version = "0.1.2"
 description = "A human readable programming language"
 authors = [
   { name="CyzmiX", email="itzmedigamingx@gmail.com" },
@@ -18,4 +18,4 @@ classifiers = [
 ]
 
 [project.scripts]
-run-my-tool = "therl.app:main"
+run-therl = "therl.app:main"

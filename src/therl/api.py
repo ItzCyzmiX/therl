@@ -1,5 +1,7 @@
-from typing import Any
 import re
+from typing import Any
+
+from therl.consts import INSTRUCTION_TO_FUNC, params_pattern, pattern
 from therl.error import (
     InvalidKeyword,
     InvalidSyntax,
@@ -7,11 +9,9 @@ from therl.error import (
     UnknownInstruction,
     UnknownVariable,
 )
+from therl.functions import Function
 from therl.utils import _decode_condition
 from therl.variable import Variable
-
-from therl.consts import pattern, params_pattern, INSTRUCTION_TO_FUNC
-from therl.functions import Function
 
 
 class Runtime:
@@ -26,9 +26,9 @@ class Runtime:
         if var:
             var.set(value)
 
-    def new(self, var_name: str, value: Any):
+    def new(self, var_name: str, value: Any, line: int = 0):
 
-        self.VARIABLES[var_name] = Variable(name=var_name, value=value)
+        self.VARIABLES[var_name] = Variable(name=var_name, value=value, line=line)
 
     def change_at_index(self, var_name: str, index: int, value: Any):
         self.VARIABLES[var_name][index] = value
@@ -41,8 +41,8 @@ class Therl:
     def __init__(self, globals: dict[str, Variable] = {}):
         self.runtime = Runtime(variables=globals)
 
-    def register_object(self, name: str, object: Variable):
-        self.runtime.new_object(obj_name=name, object=object)
+    def register_object(self, object: Variable):
+        self.runtime.new_object(obj_name=object.name, object=object)
 
     def run(self, code: str, starting_line_num: int = 0):
         """[instruction string, line number (for errors)]"""
@@ -57,7 +57,6 @@ class Therl:
         cur_conditions_met: list[bool] = []
         skip = False
         while i < len(instructions):
-
             instruction = instructions[i]
 
             tokens = [
@@ -78,7 +77,6 @@ class Therl:
                 if cur_conditions_met[-1]:
                     skip = True
                 elif cur_conditions_met and not cur_conditions_met[-1]:
-
                     condition = tokens[1]
 
                     cur_conditions_met[-1] = _decode_condition(
@@ -147,12 +145,13 @@ class Therl:
                     func_instructions.append((inner_tokens, instruction[1]))
 
                     i += 1
-            elif action == "return":
-                return INSTRUCTION_TO_FUNC[action](instruction[0][1], instruction[1])
+
             else:
                 try:
                     if not skip:
                         if not cur_conditions_met or all(cur_conditions_met):
+                            if action == "return":
+                                return INSTRUCTION_TO_FUNC[action](arg, instruction[1])
                             INSTRUCTION_TO_FUNC[action](arg, instruction[1])
                     else:
                         skip = False

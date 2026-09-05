@@ -5,12 +5,15 @@ from therl.error import (
     DividingByZero,
     IndexOutOfRange,
     InvalidKeyword,
+    InvalidSyntax,
     InvalidType,
     InvalidVariableCasting,
-    UnknownVariable,
     UnknownAttribute,
+    UnknownVariable,
 )
-from therl.lib import simpleval
+from therl.lib.simpleval import EvalWithCompoundTypes, NameNotDefined
+
+evaluator = EvalWithCompoundTypes()
 
 
 def _decode_value(value: str, line: int = 1) -> Any:
@@ -22,7 +25,7 @@ def _decode_value(value: str, line: int = 1) -> Any:
     ssplit = [
         s.strip()
         for s in re.split(
-            f"({'|'.join(map(re.escape, [' as ', ' to ', " from ", "run ", " at "]))})",
+            f"({'|'.join(map(re.escape, [' as ', ' to ', ' from ', 'run ', ' at ']))})",
             value,
         )
         if s
@@ -30,7 +33,6 @@ def _decode_value(value: str, line: int = 1) -> Any:
 
     # check running a function (getting its return value)
     if ssplit[0].strip() == "run":
-
         return _decode_run_instruction(value=value, line=line)
 
     if len(ssplit) > 2:
@@ -61,24 +63,37 @@ def _decode_value(value: str, line: int = 1) -> Any:
     from therl.api import THERL
 
     # check if its another variable, then get its value
-    if THERL.runtime.get(value) is not None:
-        return THERL.runtime.get(value).value
+    exists = THERL.runtime.get(value)
+
+    if exists is not None:
+        return exists.value
 
     raise UnknownVariable(var_name=value, line=line)
 
 
-def _decode_condition(value: str, line: int) -> bool | None:
+def _decode_condition(value: str, line: int) -> bool:
     from therl.api import THERL
 
     if value.strip() in ["true", "false"]:
         return True if value == "true" else False
 
     try:
-        return simpleval.simple_eval(
-            value,
-            names={var[0]: var[1].value for var in THERL.runtime.VARIABLES.items()},
+        evaluator.names = {
+            var[0]: var[1].value for var in THERL.runtime.VARIABLES.items()
+        }
+
+        evaluator.names.update(
+            {
+                "true": True,
+                "false": False,
+            }
         )
-    except simpleval.NameNotDefined as e:
+        return bool(
+            evaluator.eval(
+                value,
+            )
+        )
+    except NameNotDefined as e:
         raise UnknownVariable(var_name=e.name, line=line)
 
 
@@ -112,11 +127,20 @@ def _decode_expr(value: str, line: int) -> Any | None:
 
     if used_operator:
         try:
-            return simpleval.simple_eval(
-                expr=value,
-                names={var[0]: var[1].value for var in THERL.runtime.VARIABLES.items()},
+            evaluator.names = {
+                var[0]: var[1].value for var in THERL.runtime.VARIABLES.items()
+            }
+
+            evaluator.names.update(
+                {
+                    "true": True,
+                    "false": False,
+                }
             )
-        except NameError as e:
+            return evaluator.eval(
+                expr=value,
+            )
+        except NameNotDefined as e:
             raise UnknownVariable(var_name=e.name, line=line)
         except ZeroDivisionError:
             raise DividingByZero(line=line)
@@ -129,17 +153,39 @@ def _decode_run_instruction(value: str, line: int) -> Any:
     func_string = value.split("run", maxsplit=2)[1].strip()
 
     if "from" in func_string.split(" "):
-
         slices = func_string.split("from")
         var_name = slices[1].strip()
         method = slices[0].strip()
+        kwargs = {}
 
         exists = THERL.runtime.get(var_name=var_name)
 
+        if var_name.split(" ")[1].strip() == "with":
+            exists = THERL.runtime.get(var_name=var_name.split(" ")[0].strip())
+
+            params_slices = [
+                _.strip() for _ in " ".join(var_name.split(" ")[2:]).split("and")
+            ]
+
+            for param in params_slices:
+                s = [_.strip() for _ in re.split(re.escape(" "), param) if _]
+                if s[1] != "as":
+                    raise InvalidSyntax(
+                        wrong_syntax=f"Expected as in parameter assignment, found {s[1]}",
+                        line=line,
+                    )
+
+                name = s[0].strip().replace("<", "").replace(">", "")
+
+                var_value = s[2].strip()
+
+                kwargs[name] = _decode_value(var_value)
+
         if exists is None:
             raise UnknownVariable(var_name=var_name, line=line)
+
         try:
-            return getattr(exists, method)()
+            return getattr(exists, method)(**kwargs)
         except AttributeError:
             raise UnknownAttribute(
                 object_name=var_name.capitalize(), attr_name=method, line=line
@@ -158,6 +204,9 @@ def _decode_type_cast(value: str, line: int) -> int | float | str | list:
     cast_to_type = slices[1].strip()
 
     exists = THERL.runtime.get(var_name=var_name)
+
+    if exists is None:
+        raise UnknownVariable(var_name=var_name, line=line)
 
     cast_value = exists.value if exists else _decode_value(var_name)
 
@@ -206,7 +255,6 @@ def _decode_object_indexing(value: str, line: int) -> Any:
     var = THERL.runtime.get(var_name_or_list_exp)
 
     if var is not None:
-
         if not isinstance(var.value, (list, str)):
             raise InvalidType(
                 supposed_type="array or str",
@@ -218,12 +266,12 @@ def _decode_object_indexing(value: str, line: int) -> Any:
         except IndexError:
             raise IndexOutOfRange(index=index, max_index=len(var.value), line=line)
 
-    array = _decode_array(var_name_or_list_exp, line=line)
+    array = _decode_value(var_name_or_list_exp, line=line)
 
     if not isinstance(array, (list, str)):
         raise InvalidType(
             supposed_type="array or str",
-            wrong_type=var.type.__name__,
+            wrong_type=type(array).__name__,
             line=line,
         )
     try:
@@ -260,7 +308,8 @@ def _decode_array(array_str: str, line: int = 1) -> list[Any]:
 
     if ".." in clean_str:
         s_and_f = clean_str.split("..")
-
+        start = 0
+        finish = 0
         try:
             start = _decode_value(s_and_f[0])
         except ValueError:

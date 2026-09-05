@@ -1,11 +1,10 @@
-func pick
-    if false
-        say "if"
-    elseif true
-        say "elseif"
+func mama
+    if true and false
+        say "mama"
     else
-        say "else"
+        say "dada"
     end
+
 end
 
-run pick
+run mama

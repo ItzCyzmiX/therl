@@ -1,10 +1,6 @@
-import sys
 from typing import Any
-import re
-from therl.error import UnknownInstruction
+
 from therl.types import VARIABLES_TYPE
-from therl.utils import _decode_condition
-from therl.consts import pattern
 
 
 class Function:
@@ -12,16 +8,16 @@ class Function:
         self,
         name: str,
         params: list[str],
-        instructions: list[str] | None = None,
+        instructions: list[tuple[list[str], int]] | None = None,
     ) -> None:
         self.instructions = instructions
         self.name = name
         self.params = params
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"function: {self.name}"
 
-    def run(self, params: VARIABLES_TYPE | None = None) -> Any:
+    def run(self, params: VARIABLES_TYPE | None = None) -> Any | None:
         from therl.api import THERL
 
         if self.instructions is None:

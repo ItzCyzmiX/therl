@@ -1,11 +1,10 @@
 import re
 
-from therl.instructions import ADD, RETURN, RUN, SAY, SET
+from therl.instructions import RETURN, RUN, SAY, SET
 
 OPERATORS = ["+", "-", "/", "*", "**"]
 INSTRUCTIONS_KEYWORDS = sorted(
     [
-        "add",
         "set",
         "say",
         "func",
@@ -24,7 +23,6 @@ INSTRUCTIONS_KEYWORDS = sorted(
 INSTRUCTION_TO_FUNC = {
     "say": SAY,
     "set": SET,
-    "add": ADD,
     "run": RUN,
     "return": RETURN,
 }

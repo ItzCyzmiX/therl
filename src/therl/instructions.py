@@ -33,7 +33,7 @@ def SET(string: str, line: int = 1):
             alr_exits.set(new_value=value, line=line)
             return
 
-        THERL.runtime.new(name, value)
+        THERL.runtime.new(name, value, line=line)
 
     elif check_slices[1] == "at":
         slices = string.split(" ", maxsplit=2)
@@ -127,26 +127,27 @@ def SAY(string: str, line: int = 1):
 #             )
 
 
-def ADD(string: str, line: int = 1):
-    from therl.api import THERL
+# SIMPLE USE +
+# def ADD(string: str, line: int = 1):
+#     from therl.api import THERL
 
-    slices = [s.strip() for s in string.split("to") if s]
-    name = slices[1]
-    new_value = _decode_value(slices[0], line=line)
-    alr_exits = THERL.runtime.get(name)
+#     slices = [s.strip() for s in string.split("to") if s]
+#     name = slices[1]
+#     new_value = _decode_value(slices[0], line=line)
+#     alr_exits = THERL.runtime.get(name)
 
-    if alr_exits is None:
-        raise UnknownVariable(var_name=name, line=line)
+#     if alr_exits is None:
+#         raise UnknownVariable(var_name=name, line=line)
 
-    if not isinstance(alr_exits.value, (list, str)):
-        raise InvalidType(
-            supposed_type="array or str", wrong_type=alr_exits.type.__name__, line=line
-        )
+#     if not isinstance(alr_exits.value, (list, str)):
+#         raise InvalidType(
+#             supposed_type="array or str", wrong_type=alr_exits.type.__name__, line=line
+#         )
 
-    if isinstance(alr_exits.value, list):
-        alr_exits.value.append(new_value)
-    else:
-        alr_exits.value += str(new_value)
+#     if isinstance(alr_exits.value, list):
+#         alr_exits.value.append(new_value)
+#     else:
+#         alr_exits.value += str(new_value)
 
 
 def RUN(string: str, line: int = 1) -> Any:
@@ -178,7 +179,7 @@ def RUN(string: str, line: int = 1) -> Any:
             s = [_.strip() for _ in re.split(re.escape(" "), param) if _]
             if s[1] != "as":
                 raise InvalidSyntax(
-                    wrong_syntax=f"Expected as in parameter assignment, found {s[1]}",
+                    wrong_syntax=f'Expected "as" in parameter assignment, found {s[1]}',
                     line=line,
                 )
 
