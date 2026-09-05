@@ -1,6 +1,8 @@
 __pycache__
 main.dist
 main.build
-therl.egg-info
 .env
-dist
+build/
+dist/
+*.egg-info/
+*.dist-info/
