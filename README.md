@@ -156,13 +156,12 @@ Expect missing features, breaking changes, and plenty of experimentation as the 
 
 # Roadmap
 
-- [x] Conditional statements
 - [x] Arithmetic expressions
-- [ ] Loops
-- [ ] Dictionaries / Maps
-- [ ] Modules
-- [ ] Classes
 - [x] Error reporting with line numbers
+- [x] Conditional statements
+- [x] Loops
+- [ ] Modules
+- [ ] Dictionaries / Maps
 - [ ] Standard library
 
 ---
