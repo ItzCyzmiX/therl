@@ -1,6 +1,6 @@
 import re
 
-from therl.instructions import RETURN, RUN, SAY, SET
+from therl.instructions import RETURN, RUN, SAY, SET, INPUT
 
 OPERATORS = ["+", "-", "/", "*", "**"]
 INSTRUCTIONS_KEYWORDS = sorted(
@@ -18,6 +18,7 @@ INSTRUCTIONS_KEYWORDS = sorted(
         "elseif",
         "break",
         "continue",
+        "input",
     ],
     key=len,
     reverse=True,
@@ -27,6 +28,7 @@ INSTRUCTION_TO_FUNC = {
     "set": SET,
     "run": RUN,
     "return": RETURN,
+    "input": INPUT,
 }
 pattern = f"({'|'.join(map(re.escape, INSTRUCTIONS_KEYWORDS))})"
 params_pattern = f"({'|'.join(map(re.escape, ['<', '>']))})"

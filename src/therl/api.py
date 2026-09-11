@@ -36,10 +36,17 @@ class Runtime:
             del self.VARIABLES[var_name]
 
     def change_at_index(self, var_name: str, index: int, value: Any):
-        self.VARIABLES[var_name][index] = value
+        self.VARIABLES[var_name].value[index] = value
 
     def new_object(self, obj_name: str, object: Variable):
         self.VARIABLES[obj_name] = object
+
+    def new_or_set(self, var_name: str, value, line: int = 0):
+        var = self.VARIABLES.get(var_name)
+        if var:
+            var.set(value, line)
+        else:
+            self.VARIABLES[var_name] = Variable(name=var_name, value=value, line=line)
 
 
 class Therl:

@@ -127,7 +127,7 @@ def SAY(string: str, line: int = 1):
 #             )
 
 
-# SIMPLE USE +
+# SIMPLY USE +
 # def ADD(string: str, line: int = 1):
 #     from therl.api import THERL
 
@@ -231,3 +231,13 @@ def RETURN(string: str, line: int = 1) -> Any:
         return alr_exists.value.run()
     else:
         return alr_exists.value
+
+
+def INPUT(string: str, line: int = 1):
+    from therl.api import THERL
+
+    var_name = [_.strip() for _ in string.split("to") if _][0]
+
+    _ = input()
+
+    THERL.runtime.new_or_set(var_name=var_name, value=_, line=line)
