@@ -1,6 +1,0 @@
-foreach letter in "i love therl"
-	say letter 
-end
-
-
-say letter

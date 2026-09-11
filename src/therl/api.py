@@ -3,6 +3,7 @@ from typing import Any
 
 from therl.consts import INSTRUCTION_TO_FUNC, params_pattern, pattern
 from therl.error import (
+    IndexOutOfRange,
     InfiniteLoop,
     InvalidType,
     NameInUse,
@@ -104,6 +105,9 @@ class Therl:
                     raise InvalidType(
                         "array or string", type(iterator).__name__, instruction[1]
                     )
+
+                if len(iterator) == 0:
+                    raise IndexOutOfRange(0, 0, instruction[1])
 
                 self.runtime.new(var_name, iterator[0], instruction[1])
 

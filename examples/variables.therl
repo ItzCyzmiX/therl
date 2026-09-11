@@ -1,0 +1,17 @@
+set name to "Therl"
+set visits to 3
+set price to 4.5
+set ready to true
+set colors to ["red", "blue", "green"]
+
+say name
+say visits + 1
+say price * 2
+say ready
+say colors
+say colors at 1
+
+set visits to visits + 1
+
+say visits
+say colors

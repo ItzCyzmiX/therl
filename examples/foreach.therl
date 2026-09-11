@@ -1,0 +1,9 @@
+set numbers to [1, 2, 3, 4]
+
+foreach number in numbers
+    say number
+end
+
+foreach letter in "Therl"
+    say letter
+end

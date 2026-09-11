@@ -1,0 +1,17 @@
+set score to 82
+
+if score >= 90
+    say "excellent"
+elseif score >= 60
+    say "passed"
+else
+    say "try again"
+end
+
+set logged_in to true
+
+if logged_in
+    say "welcome back"
+else
+    say "please sign in"
+end

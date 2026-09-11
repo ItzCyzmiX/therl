@@ -1,0 +1,8 @@
+set count to 0
+
+while count < 3
+    say count
+    set count to count + 1
+end
+
+say "done"

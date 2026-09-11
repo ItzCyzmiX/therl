@@ -1,0 +1,11 @@
+func add <left> <right>
+    return left + right
+end
+
+func greet <name>
+    say "Hello, " + name + "!"
+end
+
+set total to run add with <left> as 7 and <right> as 5
+say total
+run greet with <name> as "Ada"

@@ -1,0 +1,11 @@
+set text_number to "42"
+set decimal_text to "3.5"
+set word to "hello"
+set letters to "abc"
+set integer_value to 42
+
+say text_number as int
+say decimal_text as float
+say integer_value as string
+say word as array
+say letters as array

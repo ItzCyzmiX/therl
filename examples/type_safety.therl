@@ -1,0 +1,8 @@
+set score to 100
+say score
+
+set score to 120
+say score
+
+set score to "one hundred twenty"
+say score
