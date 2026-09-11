@@ -83,3 +83,8 @@ class NameInUse(Exception):
         super().__init__(
             f"Invalid Function Name\nA variable with the name {var_name} already exists!"
         )
+
+
+class InfiniteLoop(Exception):
+    def __init__(self, loop_type: str, line: int) -> None:
+        super().__init__(f"Infinite {loop_type} loop at line {line}")

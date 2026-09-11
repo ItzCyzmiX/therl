@@ -3,14 +3,13 @@ from typing import Any
 
 from therl.consts import INSTRUCTION_TO_FUNC, params_pattern, pattern
 from therl.error import (
-    InvalidKeyword,
-    InvalidSyntax,
+    InfiniteLoop,
+    InvalidType,
     NameInUse,
     UnknownInstruction,
-    UnknownVariable,
 )
 from therl.functions import Function
-from therl.utils import _decode_condition
+from therl.utils import _decode_condition, _decode_value
 from therl.variable import Variable
 
 
@@ -21,14 +20,19 @@ class Runtime:
     def get(self, var_name: str) -> Variable | None:
         return self.VARIABLES.get(var_name)
 
-    def set(self, var_name: str, value: Any):
+    def set(self, var_name: str, value: Any, line: int = 0):
         var = self.VARIABLES.get(var_name)
         if var:
-            var.set(value)
+            var.set(value, line)
 
     def new(self, var_name: str, value: Any, line: int = 0):
 
         self.VARIABLES[var_name] = Variable(name=var_name, value=value, line=line)
+
+    def delete(self, var_name: str):
+        var = self.VARIABLES.get(var_name)
+        if var:
+            del self.VARIABLES[var_name]
 
     def change_at_index(self, var_name: str, index: int, value: Any):
         self.VARIABLES[var_name][index] = value
@@ -91,6 +95,115 @@ class Therl:
                 if cur_conditions_met:
                     cur_conditions_met.pop()
 
+            elif action == "foreach":
+                var_name, iterator_str = [_.strip() for _ in arg.strip().split("in", 1)]
+
+                iterator = _decode_value(iterator_str)
+
+                if not isinstance(iterator, (list, str)):
+                    raise InvalidType(
+                        "array or string", type(iterator).__name__, instruction[1]
+                    )
+
+                self.runtime.new(var_name, iterator[0], instruction[1])
+
+                start_line_num = instructions[i][1] + 1
+
+                i += 1  # ← Move to first instruction inside the loop
+                depth = 1
+                code_str = ""
+                while i < len(instructions):
+                    instruction = instructions[i]
+
+                    inner_tokens = [
+                        t.strip()
+                        for t in re.split(pattern, instruction[0], maxsplit=1)
+                        if t
+                    ]
+
+                    inner_action = inner_tokens[0]
+
+                    if inner_action in ["if", "foreach", "while"]:
+                        depth += 1
+
+                    if inner_action == "end":
+                        depth -= 1
+
+                    code_str += instruction[0] + "\n"
+
+                    if depth <= 0:
+                        for x in iterator:
+                            self.runtime.set(var_name, x, instruction[1])
+
+                            b_or_c = self.run(code_str, start_line_num)
+
+                            if b_or_c == "break":
+                                break
+
+                            if b_or_c == "continue":
+                                continue
+
+                        self.runtime.delete(var_name)
+
+                        break
+
+                    i += 1
+
+            elif action == "while":
+                condition_str = arg.strip()
+
+                condition = _decode_condition(condition_str, instructions[i][1])
+
+                start_line_num = instructions[i][1] + 1
+
+                i += 1  # ← Move to first instruction inside the loop
+                depth = 1
+                code_str = ""
+                while i < len(instructions):
+                    instruction = instructions[i]
+
+                    inner_tokens = [
+                        t.strip()
+                        for t in re.split(pattern, instruction[0], maxsplit=1)
+                        if t
+                    ]
+
+                    inner_action = inner_tokens[0]
+
+                    if inner_action in ["if", "foreach", "while"]:
+                        depth += 1
+
+                    if inner_action == "end":
+                        depth -= 1
+
+                    code_str += instruction[0] + "\n"
+
+                    if depth <= 0:
+                        try:
+                            while condition:
+                                b_or_c = self.run(code_str, start_line_num)
+
+                                if b_or_c == "break":
+                                    break
+
+                                condition = _decode_condition(
+                                    condition_str, instructions[i][1]
+                                )
+
+                                if b_or_c == "continue":
+                                    continue
+
+                                if not condition:
+                                    break
+                        except RecursionError:
+                            raise InfiniteLoop(
+                                loop_type="while", line=start_line_num - 1
+                            )
+
+                        break
+
+                    i += 1
+
             elif action == "func":
                 name_and_params = [l.strip() for l in arg.split(" ") if l]
                 func_name = name_and_params[0]
@@ -152,6 +265,11 @@ class Therl:
                         if not cur_conditions_met or all(cur_conditions_met):
                             if action == "return":
                                 return INSTRUCTION_TO_FUNC[action](arg, instruction[1])
+                            elif action == "break":
+                                return "break"
+                            elif action == "continue":
+                                return "continue"
+
                             INSTRUCTION_TO_FUNC[action](arg, instruction[1])
                     else:
                         skip = False

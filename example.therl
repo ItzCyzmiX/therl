@@ -1,10 +1,6 @@
-func mama
-    if true and false
-        say "mama"
-    else
-        say "dada"
-    end
-
+foreach letter in "i love therl"
+	say letter 
 end
 
-run mama
+
+say letter

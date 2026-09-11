@@ -16,6 +16,8 @@ INSTRUCTIONS_KEYWORDS = sorted(
         "while",
         "else",
         "elseif",
+        "break",
+        "continue",
     ],
     key=len,
     reverse=True,
