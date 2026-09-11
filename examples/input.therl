@@ -1,0 +1,3 @@
+say "What is your name?"
+input to name
+say "Hello, " + name + "!"

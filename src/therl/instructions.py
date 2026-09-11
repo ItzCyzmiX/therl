@@ -183,7 +183,7 @@ def RUN(string: str, line: int = 1) -> Any:
                     line=line,
                 )
 
-            name = s[0].strip().replace("<", "").replace(">", "")
+            name = s[0].strip().replace("<", "").replace(">", "").strip()
 
             if name not in THERL.runtime.get(func_name).value.params:
                 raise UnknownParameter(
