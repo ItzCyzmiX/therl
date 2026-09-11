@@ -236,7 +236,7 @@ def RETURN(string: str, line: int = 1) -> Any:
 def INPUT(string: str, line: int = 1):
     from therl.api import THERL
 
-    var_name = [_.strip() for _ in string.split("to") if _][0]
+    var_name = [_.strip() for _ in string.split("to") if _.strip()][0]
 
     _ = input()
 
