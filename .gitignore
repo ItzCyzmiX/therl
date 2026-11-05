@@ -1,8 +1,8 @@
+# Created by venv; see https://docs.python.org/3/library/venv.html
+/bin
+/lib
+/lib64
 __pycache__
-main.dist
-main.build
-.env
-build/
-dist/
-*.egg-info/
-*.dist-info/
+*.egg-info
+pyvenv.cfg
+include
